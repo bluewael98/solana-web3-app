@@ -35,11 +35,7 @@ export const Wallet: FC<Props> = ({ children }) => {
       config={{ commitment: "confirmed" }}
     >
       <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider>
-          <WalletMultiButton />
-          <WalletDisconnectButton />
-          {mounted && children}
-        </WalletModalProvider>
+        <WalletModalProvider>{mounted && children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
   );

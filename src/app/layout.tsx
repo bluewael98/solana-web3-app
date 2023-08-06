@@ -1,7 +1,8 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Wallet } from "./utils/Wallet";
+import { Wallet } from "../utils/Wallet";
+import { GlobalState } from "@/state/global";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,7 +19,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Wallet>{children}</Wallet>
+        <GlobalState>
+          <Wallet>{children}</Wallet>
+        </GlobalState>
       </body>
     </html>
   );
