@@ -13,6 +13,8 @@ import {
 import "@solana/wallet-adapter-react-ui/styles.css";
 import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom";
 import { clusterApiUrl } from "@solana/web3.js";
+import { useGlobalState } from "@/hooks/useGlobalState";
+import { GlobalState } from "@/state/global";
 
 type Props = { children?: React.ReactNode };
 
@@ -35,7 +37,9 @@ export const Wallet: FC<Props> = ({ children }) => {
       config={{ commitment: "confirmed" }}
     >
       <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider>{mounted && children}</WalletModalProvider>
+        <WalletModalProvider>
+          {mounted && <GlobalState>{children}</GlobalState>}
+        </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
   );

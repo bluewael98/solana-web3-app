@@ -1,3 +1,4 @@
+"use client";
 import { AnchorProvider, BN, Program } from "@project-serum/anchor";
 import { PublicKey } from "@solana/web3.js";
 import { MINIMUM_REMAINING_TIME_UNTIL_EXPIRY, PROGRAM_ID } from "./constants";

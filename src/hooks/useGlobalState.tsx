@@ -1,7 +1,8 @@
-import React from "react";
+"use client";
+import { useContext } from "react";
 
 import { GlobalContext } from "@/state/global";
 
-export const useGlobalState = () => {
-  return React.useContext(GlobalContext);
+export const useGlobalState: any = () => {
+  return useContext(GlobalContext);
 };
