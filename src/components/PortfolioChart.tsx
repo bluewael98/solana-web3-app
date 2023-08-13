@@ -1,10 +1,12 @@
 "use client";
 import { Line } from "react-chartjs-2";
+import "chart.js/auto";
 
 const options = {
   plugins: {
     legend: {
       display: false,
+      responsive: true,
     },
   },
 };
@@ -56,5 +58,5 @@ export default function PortfolioChart({ data }: any) {
       },
     ],
   };
-  return <Line data={lineGraph} options={options} width={400} height={150} />;
+  return <Line data={lineGraph} options={options} width={800} height={250} />;
 }

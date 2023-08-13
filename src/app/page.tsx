@@ -2,16 +2,16 @@
 // Components
 import Navbar from "@/components/Navbar";
 import PortfolioChart from "@/components/PortfolioChart";
+import AvailableBets from "@/components/AvailableBets";
 // Icons
 import { IoMdArrowDropdown } from "react-icons/io";
 
 // Dependencies
-import { useState, useContext, useEffect } from "react";
+import React, { useState } from "react";
 import { Toaster } from "react-hot-toast";
 import { STOCKDATA, CRYPTODATA } from "@/data/asset.seed";
-// import DropDown from "../components/DropDown";
-// import AvailableBets from "../components/AvailableBets";
-// import CustomModal from "../components/CustomModal";
+import DropDown from "@/components/DropDown";
+import CustomModal from "@/components/CustomModal";
 
 // SOLANA IMPORTS
 import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
@@ -21,13 +21,12 @@ import { useGlobalState } from "@/hooks/useGlobalState";
 //Styles
 const styles = {
   mainContainer: " w-2/3 h-full m-auto flex mt-16",
-  leftMain: "flex flex-col w-3/4 h-full  p-6 overflow-y-scroll",
+  leftMain: "flex flex-col w-3/4 h-full  p-6 ",
   portfolioAmountContainer: "flex flex-col ",
   portfolioAmount: "text-white text-4xl",
   portfolioPercent: "text-white font-bold text-sm",
   pastHour: "text-gray-400",
-  chartContainer:
-    "text-5xl flex justify-center w-full h-1/3 text-white mt-11 mb-11",
+
   buyingPowerContainer:
     "w-full border-t   h-16 border-[#30363b] flex justify-between items-center p-4",
   buyingPowerTitle: "text-white font-bolder text-xl",
@@ -39,7 +38,7 @@ const styles = {
   noticeMessage: "text-white font-bold",
   noticeCTA: "font-bold text-green-500 cursor-pointer mt-5",
   rightMain:
-    "flex flex-col flex-1 h-4/5 bg-[#1E2123] mt-6 rounded-lg overflow-y-scroll noScroll",
+    "flex flex-col flex-1 h-4/5 bg-[#1E2123] mt-6 rounded-lg overflow-hidden noScroll",
   dropDownBets:
     "absolute bg-[#1E2123] border-[#30363b] px-2 py-2 border rounded-xl top-7",
   formButtons: " w-full flex flex-row justify-center p-2 text-2xl",
@@ -59,27 +58,28 @@ const styles = {
 const timeTypes = ["seconds", "days", "months"];
 
 export default function Home() {
-  const [showStockDropDown, setShowStockDropDown] = useState(false);
-  const [showAssetDropDown, setShowAssetDropDown] = useState(true);
-  const [showBetDropdown, setShowBetDropdown] = useState(false);
+  const [showBetDropdown, setShowBetDropdown]: any = useState(false);
   const [data, setData] = useState(STOCKDATA[0]);
-  const [guess, setGuess] = useState("");
+  const [bet, setBet] = useState("");
   const [sol, setSol] = useState("");
-  const [time, setTime] = useState("");
+  const [expiryTime, setExpiryTime] = React.useState("");
   const [timeType, setTimeType] = useState(timeTypes[0]);
   const [timeDropDown, setTimeTypeDropDown] = useState(false);
-  const [selectedBet, setSelectedBet] = useState({});
-  const [showModal, setShowModal] = useState(false);
   const [stockName, setStockName]: any = useState(STOCKDATA[0].name);
   const [stockPrice, setStockPrice] = useState(STOCKDATA[0].price);
   const [priceKey, setPriceKey] = useState(STOCKDATA[0].priceKey);
-  const [availableStock, setAvailableStock] = useState([]);
+  const [availableStock, setAvailableStock] = React.useState([]);
+  const [showStockDropDown, setShowStockDropDown] = useState(false);
+  const [showAssetDropDown, setShowAssetDropDown] = useState(true);
+  const [selectedBet, setSelectedBet] = useState({});
+  const [showModal, setShowModal] = useState(false);
 
   // Static
   const staticCreatebet = () => {
     console.log("Creating bet");
   };
-  const { createBet: createBet } = useGlobalState();
+  const { allBets: allBets, createBet: createBet } = useGlobalState();
+  console.log(allBets, "All bets");
 
   return (
     <div className="w-screen flex flex-col justify-center h-screen">
@@ -87,6 +87,7 @@ export default function Home() {
       <Toaster position="top-center" reverseOrder={false} />
       <div className={styles.mainContainer}>
         <div className={styles.leftMain}>
+          {/* Top section */}
           <div className={styles.portfolioAmountContainer}>
             <div className={styles.portfolioAmount}>{data.name}</div>
             <div className={styles.portfolioPercent}>
@@ -94,30 +95,33 @@ export default function Home() {
               <span className={styles.pastHour}>Past Hour</span>
             </div>
           </div>
-          <div>
-            <div className={styles.chartContainer}>
-              {/* <PortfolioChart data={data} /> */}
+
+          <div className="flex justify-center items-center m-5">
+            <div>
+              <PortfolioChart data={data} />
             </div>
           </div>
+
           <div className={styles.buyingPowerContainer}>
             {/* Dropdown Bet Menu  */}
             <div
-              className={styles.buyingPowerAmount}
               onClick={() => setShowBetDropdown(!showBetDropdown)}
+              className={styles.buyingPowerAmount}
             >
-              {stockName} <IoMdArrowDropdown />
+              {stockName}
+              <IoMdArrowDropdown />
               {showBetDropdown && (
                 <div className={styles.dropDownBets}>
-                  {STOCKDATA.filter((data) => {
+                  {STOCKDATA.filter((data: any) => {
                     let availableBetStockName = availableStock.map(
-                      (item: any) => item.stockName
+                      (stock: any) => stock.stockName
                     );
                     if (!availableBetStockName.includes(data.name)) {
                       return data;
                     } else {
                       return;
                     }
-                  }).map((data) => {
+                  }).map((data: any) => {
                     return (
                       <p
                         key={data.name}
@@ -141,21 +145,20 @@ export default function Home() {
           <div className={styles.formButtons}>
             <div>
               <p className="text-[#ffffff]">
-                Current Stock Price: ${stockPrice}
+                Current price of {stockName}: ${stockPrice}
               </p>
             </div>
           </div>
+          {/* Submit bet */}
           <form className="flex flex-col">
-            <div className={styles.inputForm}>
+            <div className="flex flex-row mt-4">
               <input
                 className={styles.input}
                 placeholder={"PREDICTION"}
                 type="number"
                 required
-                onChange={(e) => {
-                  setGuess(e.target.value);
-                }}
-                value={guess}
+                onChange={(e) => setBet(e.target.value)}
+                value={bet}
               />
               <input
                 className={styles.input}
@@ -172,10 +175,8 @@ export default function Home() {
                 placeholder={timeType}
                 type="number"
                 required
-                onChange={(e) => {
-                  setTime(e.target.value);
-                }}
-                value={time}
+                onChange={(e) => setExpiryTime(e.target.value)}
+                value={expiryTime}
               />
               <div
                 className={styles.buyingPowerAmount}
@@ -211,16 +212,44 @@ export default function Home() {
                 e.preventDefault();
                 createBet(
                   new BN(Number(sol) * LAMPORTS_PER_SOL), // bet amount in lamports(10^-9 SOL)
-                  Number(guess), // prediction price
-                  Number(time), // duration in seconds
+                  Number(bet), // prediction price
+                  Number(expiryTime), // duration in seconds
                   new PublicKey(priceKey) // pythPriceKey
                 );
                 staticCreatebet();
               }}
             />
           </form>
+          <AvailableBets
+            availableStock={availableStock}
+            setSelectedBet={setSelectedBet}
+            setShowModal={setShowModal}
+            data={data}
+          />
+        </div>
+        <div className={styles.rightMain}>
+          <DropDown
+            data={STOCKDATA}
+            setData={setData}
+            showDropDown={showAssetDropDown}
+            setShowDropDown={setShowAssetDropDown}
+            title={"Stocks/Assets"}
+          />
+          <DropDown
+            data={CRYPTODATA}
+            setData={setData}
+            showDropDown={showStockDropDown}
+            setShowDropDown={setShowStockDropDown}
+            title={"Crypto Currencies"}
+          />
         </div>
       </div>
+      <CustomModal
+        isOpen={showModal}
+        selectedBet={selectedBet}
+        setAvailableStock={setAvailableStock}
+        setShowModal={setShowModal}
+      />
     </div>
   );
 }

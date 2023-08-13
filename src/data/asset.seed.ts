@@ -1,4 +1,4 @@
-export const STOCKDATA = [
+export const STOCKDATA: any = [
   {
     data: [10, 22, 34, 55, 72, 11, 22, 45, 92],
     name: "AMC",

@@ -1,5 +1,10 @@
 "use client";
-import React, { useContext, createContext, useEffect } from "react";
+import React, {
+  useContext,
+  createContext,
+  useEffect,
+  useCallback,
+} from "react";
 import { Context, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
 import {
@@ -63,7 +68,9 @@ export const GlobalState = ({ children }) => {
   const fetchBets = React.useCallback(async () => {
     if (!program) return;
     const allBetsResult = await program.account.bet.all();
-    const allBets = allBetsResult.map((bet) => bet.acccount);
+    const allBets = allBetsResult.map((bet) => {
+      return bet.account;
+    });
     setAllBets(allBets);
 
     // if needed you can use .filter to get JUST the users bets
@@ -94,9 +101,76 @@ export const GlobalState = ({ children }) => {
         await connection.confirmTransaction(txHash);
         console.log("Created bet!", txHash);
         toast.success("Created bet!");
+        location.reload();
       } catch (e) {
         toast.error("Failed to create bet!");
         console.log(e.message);
+      }
+    },
+    [masterAccount]
+  );
+
+  // Close Bet
+  const closeBet = React.useCallback(
+    async (bet) => {
+      if (!masterAccount) return;
+
+      try {
+        const txHash = await program.methods
+          .closeBet()
+          .accounts({
+            bet: await getBetAccountPk(bet.id),
+            player: wallet.publicKey,
+          })
+          .rpc();
+        toast.success("Closed bet!", txHash);
+        location.reload();
+      } catch (e) {
+        toast.error("Failed to close bet!");
+        console.log("Couldnt close bet", e.message);
+      }
+    },
+    [masterAccount]
+  );
+
+  // Enter Bet
+
+  const enterBet = React.useCallback(async (price, bet) => {
+    if (!masterAccount) return;
+    try {
+      const txHash = await program.methods
+        .enterBet(price)
+        .accounts({
+          bet: await getBetAccountPk(bet.id),
+          player: wallet.publicKey,
+        })
+        .rpc();
+      toast.success("Entered bet!", txHash);
+    } catch (e) {
+      console.log("Couldn't enter bet:", e.message);
+      toast.error("Failed to enter bet!");
+    }
+  });
+
+  // Claim Bet
+
+  const claimBet = useCallback(
+    async (bet) => {
+      if (!masterAccount) return;
+      try {
+        const txHash = await program.methods
+          .claimBet()
+          .accounts({
+            bet: await getBetAccountPk(bet.id),
+            pyth: bet.pythPriceKey,
+            playerA: bet.predictionA.player,
+            playerB: bet.predictionB.player,
+            signer: wallet.publicKey,
+          })
+          .rpc();
+      } catch (e) {
+        console.log("Failed to claim the bet!", e.message);
+        toast.error("Failed to claim the bet!");
       }
     },
     [masterAccount]
@@ -108,6 +182,9 @@ export const GlobalState = ({ children }) => {
         allBets: allBets,
         masterAccount: masterAccount,
         createBet: createBet,
+        closeBet: closeBet,
+        enterBet,
+        claimBet,
       }}
     >
       {children}
